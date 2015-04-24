@@ -1,6 +1,7 @@
 package com.webtech.cxt.hw9_571;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
@@ -33,11 +36,15 @@ public class MainActivity extends ActionBarActivity {
 
     public final static String EXTRA_MESSAGE = "com.webtech.cxt.MESSAGE";
     private String keywords;
+    private String pricefrom;
+    private String priceto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setTitle("EbaySearch");
         setContentView(R.layout.activity_main);
+
     }
 
 
@@ -64,15 +71,34 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void sendMessage(View view){
-        // get input object
-        EditText keywordsInput = (EditText) findViewById(R.id.keywords);
-        //get the content of input object
-        keywords = keywordsInput.getText().toString();
 
-        String basicurl = "http://571php-env.elasticbeanstalk.com/core.php?";
-        basicurl += "keywords=" + keywords +"&minPrice=&maxPrice=&shippingTime=&sortOrder=BestMatch&pagination=5";
-        DataProcessor dataProcessor = new DataProcessor();
-        dataProcessor.execute(basicurl);
+        EditText keywordsInput = (EditText) findViewById(R.id.keywords);
+        keywords = keywordsInput.getText().toString();
+        EditText pricefromInput = (EditText) findViewById(R.id.pricefrom);
+        pricefrom = pricefromInput.getText().toString();
+        EditText pricetoInput = (EditText) findViewById(R.id.priceto);
+        priceto = pricetoInput.getText().toString();
+        Spinner sortbySpinner = (Spinner) findViewById(R.id.sortby);
+        int sortbyposition = sortbySpinner.getSelectedItemPosition();
+        String sortedBy = "";
+        switch (sortbyposition){
+            case 0: sortedBy = "BestMatch";
+                    break;
+            case 1: sortedBy = "CurrentPriceHighest";
+                    break;
+            case 2: sortedBy = "PricePlusShippingHighest";
+                    break;
+            case 3: sortedBy = "PricePlusShippingLowest";
+                    break;
+        }
+
+        boolean flag = validation();
+        if(flag){
+            String basicurl = "http://571php-env.elasticbeanstalk.com/core.php?";
+            basicurl += "keywords=" + keywords +"&minPrice="+pricefrom+"&maxPrice="+priceto+"&shippingTime=&sortOrder="+sortedBy+"&pagination=5";
+            DataProcessor dataProcessor = new DataProcessor();
+            dataProcessor.execute(basicurl);
+        }
     }
 
     private class DataProcessor extends AsyncTask<String, Void, String>{
@@ -85,10 +111,24 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(String result){
 //            Toast.makeText(getApplicationContext(),result, Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(MainActivity.this, DisplayItemsPage.class);
-            intent.putExtra("itemsJson", result);
-            startActivity(intent);
-
+            try {
+                JSONObject jsonObject = new JSONObject(result);
+                String ack = jsonObject.getString("ack");
+                if(ack.equals("Success")){
+                    Intent intent = new Intent(MainActivity.this, DisplayItemsPage.class);
+                    intent.putExtra("itemsJson", result);
+                    intent.putExtra("keywords", keywords);
+                    startActivity(intent);
+                }else{
+                    //No Result
+                    TextView validateOutput = (TextView) findViewById(R.id.validation);
+                    validateOutput.setText("No Results");
+                    validateOutput.setTextColor(Color.rgb(0, 0, 0));
+                    validateOutput.setTextSize(23);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -119,6 +159,54 @@ public class MainActivity extends ActionBarActivity {
         return builder.toString();
     }
 
+    public boolean validation(){
+        TextView validateOutput = (TextView) findViewById(R.id.validation);
+        if(keywords.equals("")||keywords==null){
+            validateOutput.setText("Please enter a keyword");
+            return false;
+        }
+        if(!pricefrom.equals("")){
+            if(!pricefrom.matches("-?[0-9]+.*[0-9]*")){
+                validateOutput.setText("Price range must be number");
+                return false;
+            }
+        }
+        if(!priceto.equals("")){
+            if(!priceto.matches("-?[0-9]+.*[0-9]*")){
+                validateOutput.setText("Price range must be number");
+                return false;
+            }
+        }
+        if(!pricefrom.equals("")&&!priceto.equals("")){
+            if(Integer.parseInt(pricefrom)<0){
+                validateOutput.setText("Minimum price could not below 0");
+                return false;
+            }
+            if(Integer.parseInt(priceto)<0){
+                validateOutput.setText("Maximum price could not below 0");
+                return false;
+            }
+            if(Integer.parseInt(pricefrom)>Integer.parseInt(priceto)){
+                validateOutput.setText("Maxmum price cannot be less than munimum price");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void cleanForm(View view){
+        EditText keywordsInput = (EditText) findViewById(R.id.keywords);
+        EditText pricefromInput = (EditText) findViewById(R.id.pricefrom);
+        EditText pricetoInput = (EditText) findViewById(R.id.priceto);
+        Spinner sortbySpinner = (Spinner) findViewById(R.id.sortby);
+        TextView validateOutput = (TextView) findViewById(R.id.validation);
+
+        keywordsInput.setText("");
+        pricefromInput.setText("");
+        pricetoInput.setText("");
+        sortbySpinner.setSelection(0);
+        validateOutput.setText("");
+    }
 
 
 }

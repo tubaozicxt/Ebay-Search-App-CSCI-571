@@ -16,35 +16,121 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:text="Keywords"
-        android:id="@+id/keywordsName"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
         android:layout_below="@+id/title"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="46dp" />
+        android:layout_marginTop="46dp"
+        android:id="@+id/rl1">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="35dp"
+            android:text="Keywords"
+            android:id="@+id/keywordsName" />
 
-    <EditText
-        android:layout_width="250dp"
+        <EditText
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/keywords"
+            android:layout_toRightOf="@id/keywordsName"
+            android:layout_alignBottom="@id/keywordsName"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/rl1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/rl2">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="35dp"
+            android:text="Price From"
+            android:id="@+id/pricefromName" />
+
+        <EditText
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/pricefrom"
+            android:layout_toRightOf="@id/pricefromName"
+            android:layout_alignBottom="@id/pricefromName"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/rl2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/rl3">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="35dp"
+            android:text="Price To"
+            android:id="@+id/pricetoName" />
+
+        <EditText
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/priceto"
+            android:layout_toRightOf="@id/pricetoName"
+            android:layout_alignBottom="@id/pricetoName"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/rl3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/rl4">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="29dp"
+            android:text="Sort By"
+            android:id="@+id/sortbyName"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/sortbyName"
+            android:layout_alignBottom="@id/sortbyName"
+            android:spinnerMode="dropdown"
+            android:id="@+id/sortby"
+            android:drawSelectorOnTop="true"
+            android:entries="@array/spinnerItems"></Spinner>
+    </RelativeLayout>
+
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/keywords"
-        android:layout_alignBottom="@+id/keywordsName"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        />
+        android:text="Clear"
+        android:id="@+id/clearButton"
+        android:layout_below="@+id/rl4"
+        android:layout_alignLeft="@+id/rl4"
+        android:layout_alignStart="@+id/rl4"
+        android:layout_marginLeft="100dp"
+        android:onClick="cleanForm"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Search"
         android:id="@+id/searchButton"
-        android:layout_marginTop="110dp"
-        android:layout_below="@+id/keywords"
-        android:layout_alignLeft="@+id/keywords"
-        android:layout_alignStart="@+id/keywords"
+        android:layout_below="@+id/rl4"
+        android:layout_toRightOf="@id/clearButton"
         android:onClick="sendMessage"/>
+
+    <TextView
+        android:id="@+id/validation"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_below="@id/searchButton"
+        android:textColor="#ff0000"
+        android:gravity="center"/>
+
+
 
 
 </RelativeLayout>

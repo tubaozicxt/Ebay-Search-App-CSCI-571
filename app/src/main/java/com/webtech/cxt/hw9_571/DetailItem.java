@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,8 +15,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.WebDialog;
+import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 
@@ -28,6 +32,7 @@ public class DetailItem extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setTitle("DetailsActivity");
         setContentView(R.layout.activity_detail_item);
         facebookInitialize();
         Bundle bundle = getIntent().getExtras();
@@ -61,6 +66,9 @@ public class DetailItem extends ActionBarActivity {
     public void displayDetailInfo(){
         ImageView superimageView = (ImageView) findViewById(R.id.detail_image);
         String url = itemEntity.getImageSuperSizeUrl();
+        if(url.equals("")||url==null){
+            url = itemEntity.getImageUrl();
+        }
         ImageProcessor imageProcessor = new ImageProcessor();
         Bitmap superSizeImage = imageProcessor.extract(url);
         superimageView.setImageBitmap(superSizeImage);
@@ -83,6 +91,13 @@ public class DetailItem extends ActionBarActivity {
         Bitmap facebookImage = imageProcessor.extract("http://cs-server.usc.edu:45678/hw/hw8/fb.png");
         facebookView.setImageBitmap(facebookImage);
 
+        ImageView topRatedView = (ImageView) findViewById(R.id.topRated_icon);
+        String topRated = itemEntity.getTopRated();
+        if(topRated.equals("true")){
+            Bitmap topRatedImage = imageProcessor.extract("http://cs-server.usc.edu:45678/hw/hw8/itemTopRated.jpg");
+            topRatedView.setImageBitmap(topRatedImage);
+        }
+
         //load tab object
         tabLoader();
 
@@ -91,6 +106,87 @@ public class DetailItem extends ActionBarActivity {
         String categoryName = itemEntity.getCategoryName();
         textCategoryName.setText(categoryName);
 
+        TextView textConditonName = (TextView) findViewById(R.id.condition_display);
+        String conditionName = itemEntity.getCondition();
+        textConditonName.setText(conditionName);
+
+        TextView textBuyingFormat = (TextView) findViewById(R.id.buyingFormat_display);
+        String buyingFormat = itemEntity.getBuyingFormat();
+        textBuyingFormat.setText(buyingFormat);
+
+        //seller info
+        TextView textUsername = (TextView) findViewById(R.id.userName_display);
+        String username = itemEntity.getUserName();
+        textUsername.setText(username);
+
+        TextView textFeedbackScore = (TextView) findViewById(R.id.feedbackScore_display);
+        String feedbackScore = itemEntity.getFeedbackScore();
+        textFeedbackScore.setText(feedbackScore);
+
+        TextView textPositiveFeedback = (TextView) findViewById(R.id.positiveFeedback_display);
+        String positiveFeedback = itemEntity.getPositiveFeedback();
+        textPositiveFeedback.setText(positiveFeedback);
+
+        TextView textFeedbackRating = (TextView) findViewById(R.id.feedbackRating_display);
+        String feedbackRating = itemEntity.getFeedbackRating();
+        textFeedbackRating.setText(feedbackRating);
+
+        ImageView imageTopTatedSeller = (ImageView) findViewById(R.id.topRatedSeller_display);
+        String topRatedSeller = itemEntity.getTopRatedSeller();
+        if(topRatedSeller.equals("false")){
+            imageTopTatedSeller.setImageDrawable(getResources().getDrawable(R.drawable.cross));
+        }else{
+            imageTopTatedSeller.setImageDrawable(getResources().getDrawable(R.drawable.ok));
+        }
+
+        TextView textStoreName = (TextView) findViewById(R.id.store_display);
+        String storeName = itemEntity.getSellerStoreName();
+        if(storeName.equals("")||storeName==null){
+            textStoreName.setText("N/A");
+        }else{
+            textStoreName.setText(storeName);
+        }
+
+        //shipping info
+        TextView textShippingType = (TextView) findViewById(R.id.shippingType_display);
+        String shippingType = itemEntity.getShippingType();
+        textShippingType.setText(shippingType);
+
+        TextView textHandlingTime = (TextView) findViewById(R.id.handlingTime_display);
+        String handlingTime = itemEntity.getHandlingTime();
+        if(handlingTime.equals("")||handlingTime==null){
+            textHandlingTime.setText("N/A");
+        }else{
+            textHandlingTime.setText(handlingTime);
+        }
+
+        TextView textShippingLocations = (TextView) findViewById(R.id.shippingLocation_display);
+        String shippingLocations = itemEntity.getShippingLocation();
+        textShippingLocations.setText(shippingLocations);
+
+        ImageView imageExpeditedShipping = (ImageView) findViewById(R.id.expeditedShipping_display);
+        String expeditedShipping = itemEntity.getExpeditedShipping();
+        if(expeditedShipping.equals("false")){
+            imageExpeditedShipping.setImageDrawable(getResources().getDrawable(R.drawable.cross));
+        }else{
+            imageExpeditedShipping.setImageDrawable(getResources().getDrawable(R.drawable.ok));
+        }
+
+        ImageView imageOneDayShipping = (ImageView) findViewById(R.id.oneDayShipping_display);
+        String ondayShipping = itemEntity.getOneDayShipping();
+        if(ondayShipping.equals("false")){
+            imageOneDayShipping.setImageDrawable(getResources().getDrawable(R.drawable.cross));
+        }else{
+            imageOneDayShipping.setImageDrawable(getResources().getDrawable(R.drawable.ok));
+        }
+
+        ImageView imageReturnsAccepted = (ImageView) findViewById(R.id.returnAccepted_display);
+        String returnsAccepted = itemEntity.getReturnAccepted();
+        if(returnsAccepted.equals("false")){
+            imageReturnsAccepted.setImageDrawable(getResources().getDrawable(R.drawable.cross));
+        }else{
+            imageReturnsAccepted.setImageDrawable(getResources().getDrawable(R.drawable.ok));
+        }
 
     }
 
@@ -116,18 +212,56 @@ public class DetailItem extends ActionBarActivity {
 
     public void postFacebook(View view){
         String title = itemEntity.getTitle();
-        String url = itemEntity.getViewItemURL();
+        String itemurl = itemEntity.getViewItemURL();
+        String imageurl = itemEntity.getImageUrl();
+        String price = itemEntity.getPrice();
+        String freeornot = itemEntity.getFreeornot();
+        String locations = itemEntity.getLocationInfo();
+        String combine = "Price: $"+price+freeornot+", Location:"+locations;
+
         if (ShareDialog.canShow(ShareLinkContent.class)) {
             ShareLinkContent linkContent = new ShareLinkContent.Builder()
                     .setContentTitle(title)
-                    .setContentUrl(Uri.parse(url)).build();
+                    .setContentUrl(Uri.parse(itemurl))
+                    .setImageUrl(Uri.parse(imageurl))
+                    .setContentDescription(combine).build();
             shareDialog.show(linkContent, ShareDialog.Mode.FEED);
         }
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                String id = result.getPostId();
+                String output = "Posted Story, ID: "+id;
+                Toast.makeText(getApplicationContext(), output, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(getApplicationContext(), "Post Cancelled", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(getApplicationContext(), "Post meet Error", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void facebookInitialize(){
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
+
+    }
+
+    public void openItemLink(View view){
+        String url = itemEntity.getViewItemURL();
+        Uri uri = Uri.parse(url);
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    }
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

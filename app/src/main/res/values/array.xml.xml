@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinnerItems">
+        <item>Best Match</item>
+        <item>Price: hightest first</item>
+        <item>Price+Shipping: hightest first</item>
+        <item>Price+Shipping: lowest first</item>
+    </string-array>
+</resources>

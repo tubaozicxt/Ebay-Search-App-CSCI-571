@@ -1,46 +1,35 @@
 package com.webtech.cxt.hw9_571;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.facebook.share.model.ShareContent;
-import com.facebook.share.model.ShareLinkContent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 
 public class DisplayItemsPage extends ActionBarActivity {
 
     List<Item> itemList = new ArrayList<Item>();
+    private String keywords;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setTitle("ResultActivity");
         setContentView(R.layout.activity_display_items_page);
         resultsDisplay();
     }
@@ -72,18 +61,17 @@ public class DisplayItemsPage extends ActionBarActivity {
 
     public void resultsDisplay(){
         Intent intent = getIntent();
+        keywords = intent.getStringExtra("keywords");
+        TextView textKeywords = (TextView) findViewById(R.id.topTitle);
+        textKeywords.setText("Result for '" + keywords + "'");
         String itemsJson = intent.getStringExtra("itemsJson");
+        JSONObject jsonObject = null;
         try {
-            JSONObject jsonObject = new JSONObject(itemsJson);
-            String ack = jsonObject.getString("ack");
-            if(ack.equals("Success")){
-               //extract item info into lists
-               extractItems(jsonObject);
-               //display list view
-                displayListView();
-            }else{
-                noresult();
-            }
+            jsonObject = new JSONObject(itemsJson);
+            //extract item info into lists
+            extractItems(jsonObject);
+            //display list view
+            displayListView();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -169,7 +157,7 @@ public class DisplayItemsPage extends ActionBarActivity {
             String shippingCost = itemBasicInfo.getString("shippingServiceCost");
 
             String freeornot = "";
-            if(!shippingCost.equals("0.0")){
+            if(!shippingCost.equals("0.0")&&!shippingCost.equals("")){
                 freeornot = "(+$" +shippingCost+ " for shipping)";
             }else{
                 freeornot = "(FREE Shipping)";
@@ -226,11 +214,4 @@ public class DisplayItemsPage extends ActionBarActivity {
         }
     }
 
-
-
-
-
-    public void noresult(){
-
-    }
 }
