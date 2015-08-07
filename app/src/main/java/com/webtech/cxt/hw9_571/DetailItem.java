@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -150,7 +151,25 @@ public class DetailItem extends ActionBarActivity {
         //shipping info
         TextView textShippingType = (TextView) findViewById(R.id.shippingType_display);
         String shippingType = itemEntity.getShippingType();
-        textShippingType.setText(shippingType);
+        if(shippingType.equals("")){
+            textShippingType.setText("N/A");
+        }else{
+            String shippingTypeResult = "";
+            for(int i = 0; i < shippingType.length(); i++){
+                char c = shippingType.charAt(i);
+                if(i==0){
+                    shippingTypeResult += String.valueOf(c);
+                }else{
+                    if(Character.isUpperCase(c)){
+                        shippingTypeResult += ","+String.valueOf(c);
+                    }else{
+                        shippingTypeResult += String.valueOf(c);
+                    }
+                }
+            }
+            textShippingType.setText(shippingTypeResult);
+        }
+
 
         TextView textHandlingTime = (TextView) findViewById(R.id.handlingTime_display);
         String handlingTime = itemEntity.getHandlingTime();
@@ -231,10 +250,15 @@ public class DetailItem extends ActionBarActivity {
             @Override
             public void onSuccess(Sharer.Result result) {
                 String id = result.getPostId();
-                String output = "Posted Story, ID: "+id;
-                Toast.makeText(getApplicationContext(), output, Toast.LENGTH_LONG).show();
-            }
+                if(id!=null){
+                    String output = "Post successfully!!! Posted Story, ID: "+id;
+                    Toast.makeText(getApplicationContext(), output, Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(), "Post Cancelled", Toast.LENGTH_LONG).show();
+                }
 
+            }
             @Override
             public void onCancel() {
                 Toast.makeText(getApplicationContext(), "Post Cancelled", Toast.LENGTH_LONG).show();

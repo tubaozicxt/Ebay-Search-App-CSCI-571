@@ -84,6 +84,7 @@ public class DisplayItemsPage extends ActionBarActivity {
     }
 
     private class CustomAdapter extends ArrayAdapter<Item>{
+
         public CustomAdapter(){
             super(DisplayItemsPage.this, R.layout.item_view, itemList);
         }

@@ -125,7 +125,7 @@
     <TextView
         android:id="@+id/validation"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="match_parent"
         android:layout_below="@id/searchButton"
         android:textColor="#ff0000"
         android:gravity="center"/>

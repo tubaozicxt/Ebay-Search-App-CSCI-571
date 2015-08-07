@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -38,7 +40,7 @@ public class MainActivity extends ActionBarActivity {
     private String keywords;
     private String pricefrom;
     private String priceto;
-
+    private EditText keywordsInput;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,8 +74,8 @@ public class MainActivity extends ActionBarActivity {
 
     public void sendMessage(View view){
 
-        EditText keywordsInput = (EditText) findViewById(R.id.keywords);
-        keywords = keywordsInput.getText().toString();
+        keywordsInput = (EditText) findViewById(R.id.keywords);
+        keywords = URLEncoder.encode(keywordsInput.getText().toString());
         EditText pricefromInput = (EditText) findViewById(R.id.pricefrom);
         pricefrom = pricefromInput.getText().toString();
         EditText pricetoInput = (EditText) findViewById(R.id.priceto);
@@ -117,7 +119,7 @@ public class MainActivity extends ActionBarActivity {
                 if(ack.equals("Success")){
                     Intent intent = new Intent(MainActivity.this, DisplayItemsPage.class);
                     intent.putExtra("itemsJson", result);
-                    intent.putExtra("keywords", keywords);
+                    intent.putExtra("keywords", keywordsInput.getText().toString());
                     startActivity(intent);
                 }else{
                     //No Result
@@ -161,33 +163,33 @@ public class MainActivity extends ActionBarActivity {
 
     public boolean validation(){
         TextView validateOutput = (TextView) findViewById(R.id.validation);
-        if(keywords.equals("")||keywords==null){
+        String vkeywords = keywordsInput.getText().toString();
+        validateOutput.setText("");
+        validateOutput.setTextColor(Color.rgb(255, 0, 0));
+        validateOutput.setTextSize(13);
+        if(vkeywords.equals("")||vkeywords==null){
             validateOutput.setText("Please enter a keyword");
             return false;
         }
+        if(vkeywords.trim().isEmpty()){
+            validateOutput.setText("keywords cannot be all spaces");
+            return false;
+        }
         if(!pricefrom.equals("")){
-            if(!pricefrom.matches("-?[0-9]+.*[0-9]*")){
-                validateOutput.setText("Price range must be number");
+            if(!(pricefrom.matches("^\\+{0,1}[1-9]\\d*")||pricefrom.matches("\\+{0,1}[0]\\.[1-9]*|\\+{0,1}[1-9]\\d*\\.\\d*"))||pricefrom.trim().isEmpty()){
+                validateOutput.setText("Price range must be number and larger than 0");
                 return false;
             }
         }
         if(!priceto.equals("")){
-            if(!priceto.matches("-?[0-9]+.*[0-9]*")){
-                validateOutput.setText("Price range must be number");
+            if(!(priceto.matches("^\\+{0,1}[1-9]\\d*")||priceto.matches("\\+{0,1}[0]\\.[1-9]*|\\+{0,1}[1-9]\\d*\\.\\d*"))||priceto.trim().isEmpty()){
+                validateOutput.setText("Price range must be number and larger than 0");
                 return false;
             }
         }
         if(!pricefrom.equals("")&&!priceto.equals("")){
-            if(Integer.parseInt(pricefrom)<0){
-                validateOutput.setText("Minimum price could not below 0");
-                return false;
-            }
-            if(Integer.parseInt(priceto)<0){
-                validateOutput.setText("Maximum price could not below 0");
-                return false;
-            }
-            if(Integer.parseInt(pricefrom)>Integer.parseInt(priceto)){
-                validateOutput.setText("Maxmum price cannot be less than munimum price");
+            if(Float.parseFloat(pricefrom)>Float.parseFloat(priceto)){
+                validateOutput.setText("Maxmum price cannot be less than Minimum price");
                 return false;
             }
         }
